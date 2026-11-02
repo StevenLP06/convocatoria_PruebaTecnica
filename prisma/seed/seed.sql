@@ -82,13 +82,15 @@ ON CONFLICT ("dane_code") DO UPDATE
 INSERT INTO "stations" ("code", "name", "type", "latitude", "longitude", "altitude_m", "municipality_id")
 SELECT s.code, s.name, s.type::"station_type", s.latitude, s.longitude, s.altitude_m, m."id"
 FROM (VALUES
-    ('MZL-01', 'Manizales - Centro',     'URBAN', 5.068440, -75.517320, 2150, '17001'),
-    ('MZL-02', 'Manizales - La Nubia',   'URBAN', 5.030000, -75.465000, 2080, '17001'),
-    ('MZL-03', 'Manizales - Río Blanco', 'RURAL', 5.074000, -75.438000, 2550, '17001'),
-    ('VLM-01', 'Villamaría - Centro',    'URBAN', 5.044700, -75.514900, 1920, '17873'),
-    ('CHN-01', 'Chinchiná - Rural',      'RURAL', 4.983000, -75.603700, 1360, '17174')
-) AS s(code, name, type, latitude, longitude, altitude_m, dane_code)
+    (1, 'MZL-01', 'Manizales - Centro',     'URBAN', 5.068440, -75.517320, 2150, '17001'),
+    (2, 'MZL-02', 'Manizales - La Nubia',   'URBAN', 5.030000, -75.465000, 2080, '17001'),
+    (3, 'MZL-03', 'Manizales - Río Blanco', 'RURAL', 5.074000, -75.438000, 2550, '17001'),
+    (4, 'VLM-01', 'Villamaría - Centro',    'URBAN', 5.044700, -75.514900, 1920, '17873'),
+    (5, 'CHN-01', 'Chinchiná - Rural',      'RURAL', 4.983000, -75.603700, 1360, '17174')
+) AS s(sort_order, code, name, type, latitude, longitude, altitude_m, dane_code)
 JOIN "municipalities" m ON m."dane_code" = s.dane_code
+-- El orden explícito garantiza ids predecibles en una base nueva (MZL-01 = 1 ... CHN-01 = 5).
+ORDER BY s.sort_order
 ON CONFLICT ("code") DO UPDATE
     SET "name"            = EXCLUDED."name",
         "type"            = EXCLUDED."type",
