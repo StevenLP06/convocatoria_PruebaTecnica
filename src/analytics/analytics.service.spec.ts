@@ -68,10 +68,12 @@ describe('AnalyticsService', () => {
   });
 
   it('resume las alertas e incluye en 0 las variables sin alertas', async () => {
-    prisma.$queryRaw.mockResolvedValueOnce([alertRow]).mockResolvedValueOnce([
-      { variableCode: 'PM25', count: 4 },
-      { variableCode: 'PH', count: 2 },
-    ]);
+    prisma.$queryRaw
+      .mockResolvedValueOnce([alertRow])
+      .mockResolvedValueOnce([
+        { variableCode: 'PM25', count: 4 },
+        { variableCode: 'PH', count: 2 },
+      ]);
 
     const result = await service.getAlerts(alertsQuery);
 

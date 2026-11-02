@@ -1,6 +1,7 @@
 import { Module, ValidationPipe } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_FILTER, APP_PIPE } from '@nestjs/core';
+import { AnalyticsModule } from './analytics/analytics.module';
 import { PrismaExceptionFilter } from './common/filters/prisma-exception.filter';
 import { validateEnvironment } from './config/env.validation';
 import { MeasurementsModule } from './measurements/measurements.module';
@@ -21,6 +22,7 @@ import { VariablesModule } from './variables/variables.module';
     StationsModule,
     VariablesModule,
     MeasurementsModule,
+    AnalyticsModule,
   ],
   providers: [
     {

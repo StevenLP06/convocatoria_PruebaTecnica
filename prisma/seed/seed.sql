@@ -109,6 +109,19 @@ WHERE "station_id" IN (
     SELECT "id" FROM "stations" WHERE "code" IN ('MZL-01', 'MZL-02', 'MZL-03', 'VLM-01', 'CHN-01')
 );
 
+-- Reinicia el contador de ids justo después del mayor id restante. En una base que
+-- solo contiene datos de prueba vuelve a 1, de modo que cada ejecución genera los
+-- mismos ids; si hubiera otras mediciones, sus ids no se tocan ni se repiten.
+DO $$
+BEGIN
+    PERFORM setval(
+        pg_get_serial_sequence('"measurements"', 'id'),
+        COALESCE((SELECT max("id") FROM "measurements"), 0) + 1,
+        false
+    );
+END
+$$;
+
 -- -----------------------------------------------------------------------------
 -- 5. Mediciones.
 --

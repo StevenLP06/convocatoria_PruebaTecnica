@@ -1,13 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { VariableCode } from '@prisma/client';
-import { buildPaginationMeta, type PaginationMeta } from '../common/dto/paginated-response';
+import { buildPaginationMeta } from '../common/dto/paginated-response';
 import { type MeasurementFilterDto } from '../measurements/dto/measurement-filter.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import {
-  type AlertResult,
-  type AppliedFilters,
-  type AverageResult,
-  type ExtremeResult,
   toAlertResult,
   toAppliedFilters,
   toAverageResult,
@@ -23,30 +19,20 @@ import {
   type ExtremeRow,
   extremesQuery,
 } from './analytics.queries';
-import { type AnalyticsGroupBy, type AnalyticsQueryDto } from './dto/analytics-query.dto';
+import { type AnalyticsQueryDto } from './dto/analytics-query.dto';
+import {
+  type AlertsResponse,
+  type AveragesResponse,
+  type ExtremesResponse,
+} from './dto/analytics-response.dto';
 import { type ListAlertsQueryDto } from './dto/list-alerts-query.dto';
-
-export interface AggregationResponse<T> {
-  filters: AppliedFilters & { groupBy: AnalyticsGroupBy };
-  data: T[];
-}
-
-export interface AlertsResponse {
-  filters: AppliedFilters;
-  summary: {
-    totalAlerts: number;
-    byVariable: Partial<Record<VariableCode, number>>;
-  };
-  data: AlertResult[];
-  meta: PaginationMeta;
-}
 
 @Injectable()
 export class AnalyticsService {
   constructor(private readonly prisma: PrismaService) {}
 
   /** Promedio de cada variable (por estación si `groupBy=station`). */
-  async getAverages(query: AnalyticsQueryDto): Promise<AggregationResponse<AverageResult>> {
+  async getAverages(query: AnalyticsQueryDto): Promise<AveragesResponse> {
     await this.assertStationExists(query.stationId);
 
     const rows = await this.prisma.$queryRaw<AverageRow[]>(averagesQuery(query, query.groupBy));
@@ -61,7 +47,7 @@ export class AnalyticsService {
    * Máximo y mínimo registrados de cada variable, con la estación y el instante
    * en que ocurrieron.
    */
-  async getExtremes(query: AnalyticsQueryDto): Promise<AggregationResponse<ExtremeResult>> {
+  async getExtremes(query: AnalyticsQueryDto): Promise<ExtremesResponse> {
     await this.assertStationExists(query.stationId);
 
     const rows = await this.prisma.$queryRaw<ExtremeRow[]>(extremesQuery(query, query.groupBy));

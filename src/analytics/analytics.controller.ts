@@ -1,40 +1,59 @@
 import { Controller, Get, Query } from '@nestjs/common';
-import { type AverageResult, type ExtremeResult } from './analytics.mapper';
 import {
-  type AggregationResponse,
-  type AlertsResponse,
-  AnalyticsService,
-} from './analytics.service';
+  ApiBadRequestResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
+import { BadRequestErrorDto, NotFoundErrorDto } from '../common/dto/error-response.dto';
+import { API_TAGS } from '../config/swagger.config';
+import { AnalyticsService } from './analytics.service';
 import { AnalyticsQueryDto } from './dto/analytics-query.dto';
+import { AlertsResponse, AveragesResponse, ExtremesResponse } from './dto/analytics-response.dto';
 import { ListAlertsQueryDto } from './dto/list-alerts-query.dto';
 
+@ApiTags(API_TAGS.analytics)
+@ApiBadRequestResponse({ type: BadRequestErrorDto, description: 'Filtros inválidos' })
+@ApiNotFoundResponse({ type: NotFoundErrorDto, description: 'La estación filtrada no existe' })
 @Controller('analytics')
 export class AnalyticsController {
   constructor(private readonly analyticsService: AnalyticsService) {}
 
-  /**
-   * Promedios de las variables ambientales.
-   * Filtros: startDate, endDate, stationId, variable. Agrupación: groupBy=variable|station.
-   */
   @Get('averages')
-  getAverages(@Query() query: AnalyticsQueryDto): Promise<AggregationResponse<AverageResult>> {
+  @ApiOperation({
+    summary: 'Promedios de las variables ambientales',
+    description:
+      'Filtros: fecha inicial, fecha final, estación y variable. ' +
+      'Con groupBy=station se obtiene un promedio por estación y variable.',
+  })
+  @ApiOkResponse({ type: AveragesResponse })
+  getAverages(@Query() query: AnalyticsQueryDto): Promise<AveragesResponse> {
     return this.analyticsService.getAverages(query);
   }
 
-  /**
-   * Valores máximos y mínimos registrados, con la estación y el instante de cada uno.
-   * Filtros: startDate, endDate, stationId, variable. Agrupación: groupBy=variable|station.
-   */
   @Get('extremes')
-  getExtremes(@Query() query: AnalyticsQueryDto): Promise<AggregationResponse<ExtremeResult>> {
+  @ApiOperation({
+    summary: 'Valores máximos y mínimos registrados',
+    description:
+      'Incluye la estación y el instante en que se registró cada valor. Si un valor ' +
+      'extremo se repite, se reporta su primera ocurrencia. Mismos filtros y agrupación ' +
+      'que los promedios.',
+  })
+  @ApiOkResponse({ type: ExtremesResponse })
+  getExtremes(@Query() query: AnalyticsQueryDto): Promise<ExtremesResponse> {
     return this.analyticsService.getExtremes(query);
   }
 
-  /**
-   * Mediciones que superan los umbrales de alerta, paginadas y con resumen por variable.
-   * Filtros: startDate, endDate, stationId, variable, page, limit, order.
-   */
   @Get('alerts')
+  @ApiOperation({
+    summary: 'Alertas: mediciones que superan los umbrales',
+    description:
+      'Una medición genera alerta si es estrictamente mayor que el umbral máximo o menor ' +
+      'que el mínimo de su variable. Incluye el umbral superado, un resumen por variable ' +
+      'y paginación.',
+  })
+  @ApiOkResponse({ type: AlertsResponse })
   getAlerts(@Query() query: ListAlertsQueryDto): Promise<AlertsResponse> {
     return this.analyticsService.getAlerts(query);
   }

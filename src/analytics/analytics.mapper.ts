@@ -1,67 +1,15 @@
 import { type VariableCode } from '@prisma/client';
 import { parseDateBoundary } from '../common/utils/date-boundary.util';
 import { type MeasurementFilterDto } from '../measurements/dto/measurement-filter.dto';
+import { type AlertRow, type AverageRow, type ExtremeRow } from './analytics.queries';
 import {
-  type AlertCondition,
-  type AlertRow,
-  type AverageRow,
-  type ExtremeRow,
-} from './analytics.queries';
-
-export interface StationRef {
-  id: number;
-  code: string;
-  name: string;
-}
-
-export interface VariableRef {
-  code: VariableCode;
-  name: string;
-  unit: string;
-}
-
-/** Filtros efectivamente aplicados, con las fechas ya resueltas a instantes UTC. */
-export interface AppliedFilters {
-  from: string | null;
-  to: string | null;
-  stationId: number | null;
-  variable: VariableCode | null;
-}
-
-export interface AverageResult {
-  variable: VariableRef;
-  /** Estación del grupo; `null` cuando se agrupa solo por variable. */
-  station: StationRef | null;
-  average: number;
-  count: number;
-}
-
-export interface ExtremeValue {
-  value: number;
-  measuredAt: Date;
-  station: StationRef;
-}
-
-export interface ExtremeResult {
-  variable: VariableRef;
-  /** Estación del grupo; `null` cuando se agrupa solo por variable. */
-  station: StationRef | null;
-  count: number;
-  max: ExtremeValue;
-  min: ExtremeValue;
-}
-
-export interface AlertResult {
-  id: number;
-  value: number;
-  measuredAt: Date;
-  station: StationRef;
-  variable: VariableRef;
-  /** ABOVE_MAX: superó el umbral máximo. BELOW_MIN: quedó bajo el umbral mínimo. */
-  condition: AlertCondition;
-  /** Umbral superado. */
-  threshold: number;
-}
+  type AlertResult,
+  type AppliedFilters,
+  type AverageResult,
+  type ExtremeResult,
+  type StationRef,
+  type VariableRef,
+} from './dto/analytics-response.dto';
 
 export function toAppliedFilters(filter: MeasurementFilterDto): AppliedFilters {
   return {

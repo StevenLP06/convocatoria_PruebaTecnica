@@ -7,7 +7,9 @@ import {
 
 describe('parseDateBoundary', () => {
   it('interpreta una fecha sin hora como inicio del día en hora de Colombia', () => {
-    expect(parseDateBoundary('2026-10-05', 'start').toISOString()).toBe('2026-10-05T05:00:00.000Z');
+    expect(parseDateBoundary('2026-10-05', 'start').toISOString()).toBe(
+      '2026-10-05T05:00:00.000Z',
+    );
   });
 
   it('interpreta una fecha sin hora como fin del día en hora de Colombia', () => {

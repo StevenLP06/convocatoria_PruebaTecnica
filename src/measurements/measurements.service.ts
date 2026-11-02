@@ -15,12 +15,9 @@ import { PrismaService } from '../prisma/prisma.service';
 import { isWithinPhysicalLimits, PHYSICAL_LIMITS } from '../variables/variable-limits';
 import { type CreateMeasurementDto } from './dto/create-measurement.dto';
 import { type ListMeasurementsQueryDto } from './dto/list-measurements-query.dto';
+import { type MeasurementResponse } from './dto/measurement-response.dto';
 import { buildMeasurementWhere } from './measurement-where.builder';
-import {
-  measurementInclude,
-  type MeasurementResponse,
-  toMeasurementResponse,
-} from './measurements.mapper';
+import { measurementInclude, toMeasurementResponse } from './measurements.mapper';
 
 /** Tolerancia para desfases de reloj entre la estación y el servidor. */
 export const FUTURE_TOLERANCE_MS = 5 * 60 * 1000;

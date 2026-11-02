@@ -1,3 +1,4 @@
+import { ApiPropertyOptional } from '@nestjs/swagger';
 import { VariableCode } from '@prisma/client';
 import { Transform, Type } from 'class-transformer';
 import { IsEnum, IsInt, IsOptional, Max, Min } from 'class-validator';
@@ -10,7 +11,7 @@ import { toUpperCase } from '../../common/utils/query-transform.util';
  * Se reutiliza en el listado de mediciones y en los endpoints de análisis.
  */
 export class MeasurementFilterDto extends DateRangeQueryDto {
-  /** Filtra por estación (id). */
+  @ApiPropertyOptional({ description: 'Filtra por estación (id)', example: 1 })
   @IsOptional()
   @Type(() => Number)
   @IsInt()
@@ -18,7 +19,11 @@ export class MeasurementFilterDto extends DateRangeQueryDto {
   @Max(MAX_INT_ID)
   stationId?: number;
 
-  /** Filtra por variable ambiental (código, sin distinguir mayúsculas). */
+  @ApiPropertyOptional({
+    description: 'Filtra por variable ambiental (no distingue mayúsculas)',
+    enum: VariableCode,
+    enumName: 'VariableCode',
+  })
   @IsOptional()
   @Transform(toUpperCase)
   @IsEnum(VariableCode, {

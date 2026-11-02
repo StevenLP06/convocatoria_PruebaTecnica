@@ -1,5 +1,6 @@
-import { IsEnum, IsOptional } from 'class-validator';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
+import { IsEnum, IsOptional } from 'class-validator';
 import { toLowerCase } from '../../common/utils/query-transform.util';
 import { MeasurementFilterDto } from '../../measurements/dto/measurement-filter.dto';
 
@@ -15,6 +16,14 @@ export enum AnalyticsGroupBy {
  * rango de fechas, estación, variable y nivel de agrupación.
  */
 export class AnalyticsQueryDto extends MeasurementFilterDto {
+  @ApiPropertyOptional({
+    description:
+      'variable: un resultado por variable (combina las estaciones filtradas). ' +
+      'station: un resultado por cada estación y variable.',
+    enum: AnalyticsGroupBy,
+    enumName: 'AnalyticsGroupBy',
+    default: AnalyticsGroupBy.Variable,
+  })
   @IsOptional()
   @Transform(toLowerCase)
   @IsEnum(AnalyticsGroupBy, { message: 'groupBy debe ser variable o station' })

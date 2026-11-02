@@ -1,4 +1,8 @@
-import { type Prisma, type StationType } from '@prisma/client';
+import { type Prisma } from '@prisma/client';
+import {
+  type MunicipalityDetailResponse,
+  type MunicipalityResponse,
+} from './dto/municipality-response.dto';
 
 export const municipalityListInclude = {
   _count: { select: { stations: true } },
@@ -17,26 +21,6 @@ type MunicipalityWithCount = Prisma.MunicipalityGetPayload<{
 type MunicipalityWithStations = Prisma.MunicipalityGetPayload<{
   include: typeof municipalityDetailInclude;
 }>;
-
-export interface MunicipalityResponse {
-  id: number;
-  daneCode: string;
-  name: string;
-  department: string;
-  stationsCount: number;
-}
-
-export interface MunicipalityStationSummary {
-  id: number;
-  code: string;
-  name: string;
-  type: StationType;
-  isActive: boolean;
-}
-
-export interface MunicipalityDetailResponse extends Omit<MunicipalityResponse, 'stationsCount'> {
-  stations: MunicipalityStationSummary[];
-}
 
 export function toMunicipalityResponse(municipality: MunicipalityWithCount): MunicipalityResponse {
   return {

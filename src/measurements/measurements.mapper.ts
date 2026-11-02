@@ -1,5 +1,6 @@
-import { type Prisma, type VariableCode } from '@prisma/client';
+import { type Prisma } from '@prisma/client';
 import { decimalToNumber } from '../common/utils/decimal.util';
+import { type MeasurementResponse } from './dto/measurement-response.dto';
 
 export const measurementInclude = {
   station: { select: { id: true, code: true, name: true } },
@@ -9,23 +10,6 @@ export const measurementInclude = {
 type MeasurementWithRelations = Prisma.MeasurementGetPayload<{
   include: typeof measurementInclude;
 }>;
-
-export interface MeasurementResponse {
-  id: number;
-  value: number;
-  /** Instante de la medición en UTC (ISO 8601). */
-  measuredAt: Date;
-  station: {
-    id: number;
-    code: string;
-    name: string;
-  };
-  variable: {
-    code: VariableCode;
-    name: string;
-    unit: string;
-  };
-}
 
 export function toMeasurementResponse(measurement: MeasurementWithRelations): MeasurementResponse {
   return {

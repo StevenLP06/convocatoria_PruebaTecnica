@@ -22,6 +22,11 @@ describe('buildMeasurementSqlConditions', () => {
       'm."station_id" = $1 AND v."code"::text = $2 AND ' +
         'm."measured_at" >= $3::timestamptz AND m."measured_at" <= $4::timestamptz',
     );
-    expect(sql.values).toEqual([3, 'PH', '2026-10-01T05:00:00.000Z', '2026-10-08T04:59:59.999Z']);
+    expect(sql.values).toEqual([
+      3,
+      'PH',
+      '2026-10-01T05:00:00.000Z',
+      '2026-10-08T04:59:59.999Z',
+    ]);
   });
 });

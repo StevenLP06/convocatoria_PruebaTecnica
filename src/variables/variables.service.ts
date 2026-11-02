@@ -1,7 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { type VariableCode } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
-import { toVariableResponse, type VariableResponse } from './variables.mapper';
+import { type VariableResponse } from './dto/variable-response.dto';
+import { toVariableResponse } from './variables.mapper';
 
 @Injectable()
 export class VariablesService {

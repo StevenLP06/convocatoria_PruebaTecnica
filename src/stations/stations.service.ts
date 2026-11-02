@@ -2,7 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { type Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { type ListStationsQueryDto } from './dto/list-stations-query.dto';
-import { stationInclude, type StationResponse, toStationResponse } from './stations.mapper';
+import { type StationResponse } from './dto/station-response.dto';
+import { stationInclude, toStationResponse } from './stations.mapper';
 
 @Injectable()
 export class StationsService {

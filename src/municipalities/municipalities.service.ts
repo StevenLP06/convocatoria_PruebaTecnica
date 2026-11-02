@@ -1,10 +1,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import {
-  municipalityDetailInclude,
-  municipalityListInclude,
   type MunicipalityDetailResponse,
   type MunicipalityResponse,
+} from './dto/municipality-response.dto';
+import {
+  municipalityDetailInclude,
+  municipalityListInclude,
   toMunicipalityDetailResponse,
   toMunicipalityResponse,
 } from './municipalities.mapper';

@@ -1,3 +1,4 @@
+import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
 import { IsEnum, IsInt, IsOptional, Max, Min } from 'class-validator';
 import { DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE } from '../../common/constants/app.constants';
@@ -16,14 +17,19 @@ export enum SortOrder {
  * endpoints de análisis) agregando paginación y orden.
  */
 export class ListMeasurementsQueryDto extends MeasurementFilterDto {
-  /** Número de página (inicia en 1). */
+  @ApiPropertyOptional({ description: 'Número de página (inicia en 1)', default: 1, minimum: 1 })
   @IsOptional()
   @Type(() => Number)
   @IsInt()
   @Min(1)
   page: number = 1;
 
-  /** Cantidad de elementos por página. */
+  @ApiPropertyOptional({
+    description: 'Cantidad de elementos por página',
+    default: DEFAULT_PAGE_SIZE,
+    minimum: 1,
+    maximum: MAX_PAGE_SIZE,
+  })
   @IsOptional()
   @Type(() => Number)
   @IsInt()
@@ -31,7 +37,12 @@ export class ListMeasurementsQueryDto extends MeasurementFilterDto {
   @Max(MAX_PAGE_SIZE)
   limit: number = DEFAULT_PAGE_SIZE;
 
-  /** Orden por fecha de medición: `desc` (más recientes primero, por defecto) o `asc`. */
+  @ApiPropertyOptional({
+    description: 'Orden por fecha de medición: desc (más recientes primero) o asc',
+    enum: SortOrder,
+    enumName: 'SortOrder',
+    default: SortOrder.Desc,
+  })
   @IsOptional()
   @Transform(toLowerCase)
   @IsEnum(SortOrder, { message: 'order debe ser asc o desc' })
