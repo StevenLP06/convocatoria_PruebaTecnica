@@ -1,0 +1,113 @@
+// Modelo de datos del servicio de monitoreo ambiental (SAT).
+//
+// Decisión de diseño: las mediciones se almacenan en formato largo
+// (una fila por estación + variable + instante). Así los filtros por variable,
+// las agregaciones y la evaluación de umbrales son uniformes para todas las
+// variables, y agregar un nuevo indicador no requiere cambiar el esquema.
+//
+// Convenciones: modelos/campos en camelCase en TypeScript y tablas/columnas
+// en snake_case en PostgreSQL (vía @map / @@map).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// Tipo de estación según su entorno.
+enum StationType {
+  URBAN
+  RURAL
+
+  @@map("station_type")
+}
+
+/// Variables ambientales soportadas por el sistema.
+enum VariableCode {
+  TEMPERATURE
+  HUMIDITY
+  PM25
+  PRECIPITATION
+  PH
+
+  @@map("variable_code")
+}
+
+/// Municipio donde se ubican las estaciones.
+model Municipality {
+  id         Int       @id @default(autoincrement())
+  /// Código DANE del municipio (5 dígitos).
+  daneCode   String    @unique @map("dane_code") @db.Char(5)
+  name       String    @db.VarChar(100)
+  department String    @db.VarChar(100)
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt  DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+  stations   Station[]
+
+  @@unique([name, department])
+  @@map("municipalities")
+}
+
+/// Estación de monitoreo ambiental.
+model Station {
+  id             Int           @id @default(autoincrement())
+  /// Código único legible de la estación (p. ej. MZL-01).
+  code           String        @unique @db.VarChar(20)
+  name           String        @db.VarChar(120)
+  type           StationType
+  latitude       Decimal       @db.Decimal(9, 6)
+  longitude      Decimal       @db.Decimal(9, 6)
+  /// Altitud en metros sobre el nivel del mar.
+  altitudeM      Int           @map("altitude_m")
+  isActive       Boolean       @default(true) @map("is_active")
+  municipalityId Int           @map("municipality_id")
+  createdAt      DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime      @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+  municipality   Municipality  @relation(fields: [municipalityId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  measurements   Measurement[]
+
+  @@index([municipalityId])
+  @@map("stations")
+}
+
+/// Catálogo de variables ambientales con sus umbrales de alerta.
+/// Una medición genera alerta si value > alertMax o value < alertMin
+/// (comparación estricta). Un umbral nulo significa "sin límite" en ese sentido.
+model Variable {
+  id           Int           @id @default(autoincrement())
+  code         VariableCode  @unique
+  name         String        @db.VarChar(60)
+  unit         String        @db.VarChar(20)
+  alertMin     Decimal?      @map("alert_min") @db.Decimal(8, 2)
+  alertMax     Decimal?      @map("alert_max") @db.Decimal(8, 2)
+  createdAt    DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt    DateTime      @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+  measurements Measurement[]
+
+  @@map("variables")
+}
+
+/// Valor registrado por una estación para una variable en un instante dado.
+model Measurement {
+  id         Int      @id @default(autoincrement())
+  stationId  Int      @map("station_id")
+  variableId Int      @map("variable_id")
+  value      Decimal  @db.Decimal(8, 2)
+  /// Instante de la medición (se almacena en UTC).
+  measuredAt DateTime @map("measured_at") @db.Timestamptz(3)
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  station    Station  @relation(fields: [stationId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  variable   Variable @relation(fields: [variableId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  // Evita lecturas duplicadas y sirve como índice principal para
+  // consultas por estación + variable + rango de fechas.
+  @@unique([stationId, variableId, measuredAt])
+  // Consultas por variable y rango de fechas sin filtrar por estación.
+  @@index([variableId, measuredAt])
+  // Consultas solo por rango de fechas.
+  @@index([measuredAt])
+  @@map("measurements")
+}
