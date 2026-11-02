@@ -60,6 +60,8 @@ export class AverageResult {
     type: () => StationRef,
     nullable: true,
     description: 'Estación del grupo; null cuando se agrupa solo por variable',
+    // Coherente con el ejemplo de filtros (groupBy=variable).
+    example: null,
   })
   station: StationRef | null;
 
@@ -101,6 +103,8 @@ export class ExtremeResult {
     type: () => StationRef,
     nullable: true,
     description: 'Estación del grupo; null cuando se agrupa solo por variable',
+    // Coherente con el ejemplo de filtros (groupBy=variable).
+    example: null,
   })
   station: StationRef | null;
 
