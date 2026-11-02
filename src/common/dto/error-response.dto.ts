@@ -55,3 +55,14 @@ export class UnprocessableEntityErrorDto {
   @ApiProperty({ example: 'La estación MZL-01 está inactiva y no puede registrar mediciones' })
   message: string;
 }
+
+export class ServiceUnavailableErrorDto {
+  @ApiProperty({ example: 503 })
+  statusCode: number;
+
+  @ApiProperty({ example: 'Service Unavailable' })
+  error: string;
+
+  @ApiProperty({ example: 'La base de datos no responde' })
+  message: string;
+}

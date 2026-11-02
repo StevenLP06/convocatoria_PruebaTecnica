@@ -4,6 +4,7 @@ import { APP_FILTER, APP_PIPE } from '@nestjs/core';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { PrismaExceptionFilter } from './common/filters/prisma-exception.filter';
 import { validateEnvironment } from './config/env.validation';
+import { HealthModule } from './health/health.module';
 import { MeasurementsModule } from './measurements/measurements.module';
 import { MunicipalitiesModule } from './municipalities/municipalities.module';
 import { PrismaModule } from './prisma/prisma.module';
@@ -18,6 +19,7 @@ import { VariablesModule } from './variables/variables.module';
       validate: validateEnvironment,
     }),
     PrismaModule,
+    HealthModule,
     MunicipalitiesModule,
     StationsModule,
     VariablesModule,

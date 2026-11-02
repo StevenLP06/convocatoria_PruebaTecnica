@@ -1,0 +1,70 @@
+# =============================================================================
+# SAT Environmental API - entorno completo
+#
+#   docker compose up --build
+#
+# Arranca en orden:
+#   1. db       → PostgreSQL 16 (espera a estar sano antes de continuar)
+#   2. migrate  → aplica migraciones y carga los datos sintéticos (si la base está vacía)
+#   3. api      → la API en http://localhost:3000/api/v1 (Swagger en /api/docs)
+#
+# Las variables se toman del archivo .env si existe; todas tienen valor por defecto.
+# =============================================================================
+
+name: sat-environmental
+
+x-database-url: &database-url postgresql://${POSTGRES_USER:-sat_user}:${POSTGRES_PASSWORD:-sat_password}@db:5432/${POSTGRES_DB:-sat_environmental}?schema=public
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-sat_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-sat_password}
+      POSTGRES_DB: ${POSTGRES_DB:-sat_environmental}
+    ports:
+      # Por defecto 5433 en el host para no chocar con un PostgreSQL local en 5432.
+      - "${DB_PORT:-5433}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  migrate:
+    build:
+      context: .
+      target: build
+    image: sat-environmental-api:build
+    environment:
+      DATABASE_URL: *database-url
+      SEED_DATABASE: ${SEED_DATABASE:-if-empty}
+    command: ["node", "dist/scripts/db-init.js"]
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+
+  api:
+    build:
+      context: .
+      target: runtime
+    image: sat-environmental-api:latest
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DATABASE_URL: *database-url
+    ports:
+      - "${API_PORT:-3000}:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+
+volumes:
+  pgdata:

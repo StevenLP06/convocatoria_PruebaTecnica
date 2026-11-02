@@ -10,6 +10,7 @@ export const API_TAGS = {
   variables: 'Variables',
   measurements: 'Mediciones',
   analytics: 'Análisis',
+  health: 'Salud',
 } as const;
 
 const API_DESCRIPTION = `
@@ -54,6 +55,7 @@ export function setupSwagger(app: INestApplication): void {
     .addTag(API_TAGS.variables, 'Variables ambientales, unidades y umbrales de alerta')
     .addTag(API_TAGS.measurements, 'Registro y consulta de mediciones')
     .addTag(API_TAGS.analytics, 'Promedios, máximos y mínimos, y alertas')
+    .addTag(API_TAGS.health, 'Estado del servicio y de la conexión a la base de datos')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

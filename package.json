@@ -30,6 +30,7 @@
     "db:migrate:status": "prisma migrate status",
     "db:seed": "prisma db seed",
     "db:setup": "npm run db:migrate && npm run db:seed",
+    "db:init": "ts-node src/scripts/db-init.ts",
     "db:reset": "prisma migrate reset --force"
   },
   "dependencies": {
