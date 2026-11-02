@@ -27,7 +27,10 @@
     "prisma:validate": "prisma validate",
     "db:migrate": "prisma migrate deploy",
     "db:migrate:dev": "prisma migrate dev",
-    "db:migrate:status": "prisma migrate status"
+    "db:migrate:status": "prisma migrate status",
+    "db:seed": "prisma db seed",
+    "db:setup": "npm run db:migrate && npm run db:seed",
+    "db:reset": "prisma migrate reset --force"
   },
   "dependencies": {
     "@nestjs/common": "^11.1.6",
@@ -66,7 +69,8 @@
     "typescript-eslint": "^8.43.0"
   },
   "prisma": {
-    "schema": "prisma/schema.prisma"
+    "schema": "prisma/schema.prisma",
+    "seed": "prisma db execute --file prisma/seed/seed.sql --schema prisma/schema.prisma"
   },
   "jest": {
     "moduleFileExtensions": [
