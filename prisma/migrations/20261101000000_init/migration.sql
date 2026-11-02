@@ -1,10 +1,7 @@
--- CreateEnum
 CREATE TYPE "station_type" AS ENUM ('URBAN', 'RURAL');
 
--- CreateEnum
 CREATE TYPE "variable_code" AS ENUM ('TEMPERATURE', 'HUMIDITY', 'PM25', 'PRECIPITATION', 'PH');
 
--- CreateTable
 CREATE TABLE "municipalities" (
     "id" SERIAL NOT NULL,
     "dane_code" CHAR(5) NOT NULL,
@@ -16,7 +13,6 @@ CREATE TABLE "municipalities" (
     CONSTRAINT "municipalities_pkey" PRIMARY KEY ("id")
 );
 
--- CreateTable
 CREATE TABLE "stations" (
     "id" SERIAL NOT NULL,
     "code" VARCHAR(20) NOT NULL,
@@ -33,7 +29,6 @@ CREATE TABLE "stations" (
     CONSTRAINT "stations_pkey" PRIMARY KEY ("id")
 );
 
--- CreateTable
 CREATE TABLE "variables" (
     "id" SERIAL NOT NULL,
     "code" "variable_code" NOT NULL,
@@ -47,7 +42,6 @@ CREATE TABLE "variables" (
     CONSTRAINT "variables_pkey" PRIMARY KEY ("id")
 );
 
--- CreateTable
 CREATE TABLE "measurements" (
     "id" SERIAL NOT NULL,
     "station_id" INTEGER NOT NULL,
@@ -59,37 +53,29 @@ CREATE TABLE "measurements" (
     CONSTRAINT "measurements_pkey" PRIMARY KEY ("id")
 );
 
--- CreateIndex
 CREATE UNIQUE INDEX "municipalities_dane_code_key" ON "municipalities"("dane_code");
 
--- CreateIndex
 CREATE UNIQUE INDEX "municipalities_name_department_key" ON "municipalities"("name", "department");
 
--- CreateIndex
 CREATE UNIQUE INDEX "stations_code_key" ON "stations"("code");
 
--- CreateIndex
 CREATE INDEX "stations_municipality_id_idx" ON "stations"("municipality_id");
 
--- CreateIndex
 CREATE UNIQUE INDEX "variables_code_key" ON "variables"("code");
 
--- CreateIndex
 CREATE INDEX "measurements_variable_id_measured_at_idx" ON "measurements"("variable_id", "measured_at");
 
--- CreateIndex
 CREATE INDEX "measurements_measured_at_idx" ON "measurements"("measured_at");
 
--- CreateIndex
 CREATE UNIQUE INDEX "measurements_station_id_variable_id_measured_at_key" ON "measurements"("station_id", "variable_id", "measured_at");
 
--- AddForeignKey
+-- Llave Foránea
 ALTER TABLE "stations" ADD CONSTRAINT "stations_municipality_id_fkey" FOREIGN KEY ("municipality_id") REFERENCES "municipalities"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
--- AddForeignKey
+-- Llave Foránea
 ALTER TABLE "measurements" ADD CONSTRAINT "measurements_station_id_fkey" FOREIGN KEY ("station_id") REFERENCES "stations"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
--- AddForeignKey
+-- Llave Foránea
 ALTER TABLE "measurements" ADD CONSTRAINT "measurements_variable_id_fkey" FOREIGN KEY ("variable_id") REFERENCES "variables"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- ---------------------------------------------------------------------------
@@ -112,9 +98,7 @@ ALTER TABLE "variables"
     ADD CONSTRAINT "variables_alert_range_chk"
     CHECK ("alert_min" IS NULL OR "alert_max" IS NULL OR "alert_min" < "alert_max");
 
--- ---------------------------------------------------------------------------
 -- Documentación del modelo en el propio catálogo de PostgreSQL.
--- ---------------------------------------------------------------------------
 COMMENT ON TABLE "municipalities" IS 'Municipios donde se ubican las estaciones de monitoreo.';
 COMMENT ON TABLE "stations" IS 'Estaciones de monitoreo ambiental.';
 COMMENT ON TABLE "variables" IS 'Catálogo de variables ambientales y sus umbrales de alerta.';
