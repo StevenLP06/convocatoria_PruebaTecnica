@@ -10,19 +10,67 @@ estaciones de monitoreo (temperatura, humedad relativa, PM2.5, precipitación y 
 
 NestJS · TypeScript · PostgreSQL · Prisma · Swagger/OpenAPI · Docker
 
-## Requisitos
+## Puesta en marcha con Docker (recomendada)
 
-- Node.js 20.11 o superior (ver `.nvmrc`)
-- PostgreSQL 16
+Requisito: Docker con Docker Compose v2.
 
-## Puesta en marcha local
+```bash
+docker compose up --build
+```
+
+Un solo comando levanta todo el entorno, en este orden:
+
+| Servicio | Qué hace |
+|---|---|
+| `db` | PostgreSQL 16. Los demás servicios esperan a que esté sano (`pg_isready`). |
+| `migrate` | Aplica las migraciones de Prisma y carga los datos sintéticos si la base está vacía. Termina al acabar. |
+| `api` | Arranca la API cuando `migrate` terminó con éxito. Su estado se verifica con `GET /api/v1/health`. |
+
+Cuando la terminal muestre `API escuchando en http://localhost:3000/api/v1`:
+
+- API: <http://localhost:3000/api/v1>
+- Swagger: <http://localhost:3000/api/docs>
+- Estado: <http://localhost:3000/api/v1/health>
+
+Comandos útiles:
+
+```bash
+docker compose up --build -d                            # en segundo plano
+docker compose ps                                       # estado y salud de los servicios
+docker compose logs -f api                              # logs de la API
+docker compose run --rm -e SEED_DATABASE=always migrate # recargar los datos sintéticos
+docker compose down                                     # detener (conserva los datos)
+docker compose down -v                                  # detener y borrar la base de datos
+```
+
+**Configuración:** todas las variables tienen valores por defecto, así que no hace falta un
+`.env`. Para cambiarlas, copia `.env.example` como `.env`. Por defecto PostgreSQL se publica en
+el puerto **5433** del equipo, para no chocar con un PostgreSQL local en el 5432.
+
+**Datos sintéticos (`SEED_DATABASE`):**
+
+- `if-empty` (por defecto): los carga solo si no hay mediciones, así que reiniciar los
+  contenedores no borra lo registrado por la API.
+- `always`: los recarga siempre.
+- `never`: solo aplica las migraciones.
+
+**Imagen de la API:** Dockerfile multi-stage. La imagen final contiene solo las dependencias de
+producción y el código compilado, se ejecuta con un usuario sin privilegios (`node`) e incluye
+un `HEALTHCHECK`.
+
+## Puesta en marcha local (sin Docker)
+
+Requisitos: Node.js 24 LTS (ver `.nvmrc`; la misma versión que usa la imagen de Docker) y PostgreSQL 16.
 
 ```bash
 npm install                 # instala dependencias y genera el cliente de Prisma
 cp .env.example .env        # ajusta DATABASE_URL a tu PostgreSQL
-npm run db:setup            # aplica las migraciones y carga los datos sintéticos
+npm run db:init             # aplica las migraciones y carga los datos sintéticos
 npm run start:dev           # API en http://localhost:3000/api/v1
 ```
+
+`npm run db:reset` recrea la base desde cero: la borra, aplica las migraciones y carga los
+datos.
 
 ## Documentación de la API (Swagger / OpenAPI)
 
@@ -51,6 +99,7 @@ Todas las rutas cuelgan de `/api/v1`.
 | GET | `/analytics/averages` | Promedios. Filtros: `startDate`, `endDate`, `stationId`, `variable`, `groupBy` |
 | GET | `/analytics/extremes` | Máximos y mínimos con estación e instante. Mismos filtros que promedios |
 | GET | `/analytics/alerts` | Mediciones que superan los umbrales, con resumen por variable. Filtros: `startDate`, `endDate`, `stationId`, `variable`, `page`, `limit`, `order` |
+| GET | `/health` | Estado del servicio y de la conexión a la base de datos (200 / 503) |
 
 **Fechas:** `startDate` y `endDate` aceptan `YYYY-MM-DD` (día completo en hora de Colombia)
 o fecha-hora ISO 8601 con zona horaria. Ambos extremos son inclusivos.

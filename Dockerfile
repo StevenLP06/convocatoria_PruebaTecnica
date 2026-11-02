@@ -9,7 +9,9 @@
 #              ejecutada con un usuario sin privilegios.
 # =============================================================================
 
-ARG NODE_VERSION=22
+# Node 24 (LTS) trae npm 11. Debe coincidir con la versión usada en desarrollo (.nvmrc):
+# npm 10 rechaza con `npm ci` algunos lockfiles generados por npm 11.
+ARG NODE_VERSION=24
 
 # -----------------------------------------------------------------------------
 # base: Node + OpenSSL (lo requieren los motores de Prisma en Alpine)
